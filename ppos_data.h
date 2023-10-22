@@ -25,6 +25,10 @@ typedef struct task_t
    unsigned int awakeTime; // used to store the time when it should be waked up
 
    // ... (outros campos deve ser adicionados APOS esse comentario)
+   int estimated_execution_time; // indica o tempo estimado para a execucao da tarefa
+   int start_time; // indica em milisegundos quando a tarefa inicou sua execucao em relacao ao tempo global do sistema
+   int running_time; // indica o tempo que a tarefa executou ate o momento
+   int last_running_time; // indica o tempo que a tarefa executou mas só é atualizado quando a tarefa perde o processador
    
 } task_t ;
 

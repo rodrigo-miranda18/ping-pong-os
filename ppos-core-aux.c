@@ -6,7 +6,39 @@
 // Coloque aqui as suas modificações, p.ex. includes, defines variáveis, 
 // estruturas e funções
 
+#include <time.h>
 
+unsigned int getSystime () {
+    clock_t clockTicks = clock(); // Obter o número de ciclos de clock decorridos.
+    unsigned int milliseconds = (unsigned int)((clockTicks * 1000) / CLOCKS_PER_SEC);
+
+    return milliseconds;
+}
+
+void task_set_eet (task_t *task, int et) {
+    task_t *task_ptr = task == NULL ? taskExec : task;
+
+    task_ptr->estimated_execution_time = et;
+}
+
+int task_get_eet (task_t *task) {
+    task_t *task_ptr = task == NULL ? taskExec : task;
+
+    return task_ptr->estimated_execution_time;
+}
+
+int task_get_ret (task_t *task) {
+    task_t *task_ptr = task == NULL ? taskExec : task;
+
+    return (task->estimated_execution_time - task->running_time);
+}
+
+int task_get_et (task_t *task) {
+    task_t *task_ptr = task == NULL ? taskExec : task;
+    task_ptr->running_time = task_ptr->last_running_time + (getSystime() - task_ptr->start_time);
+
+    return task_ptr->running_time;
+}
 // ****************************************************************************
 
 
@@ -54,7 +86,8 @@ void after_task_exit () {
 }
 
 void before_task_switch ( task_t *task ) {
-    // put your customization here
+    task->start_time = getSystime(); // Task que vai receber o processador
+    taskExec->last_running_time = task_get_et(NULL);  // Task que vai sair do processador
 #ifdef DEBUG
     printf("\ntask_switch - BEFORE - [%d -> %d]", taskExec->id, task->id);
 #endif
@@ -397,11 +430,20 @@ int after_mqueue_msgs (mqueue_t *queue) {
 }
 
 task_t * scheduler() {
-    // FCFS scheduler
-    if ( readyQueue != NULL ) {
-        return readyQueue;
+    if ( readyQueue == NULL ) {
+        return NULL;
     }
-    return NULL;
+
+    task_t *current_task = readyQueue;
+    task_t *shortest_remaining_time_task = readyQueue;
+
+    while (current_task->next != readyQueue) {
+        if (task_get_ret(current_task->next) < task_get_ret(shortest_remaining_time_task) && task_get_ret(current_task->next) > 0) {
+            shortest_remaining_time_task = current_task->next;
+        }
+
+        current_task = current_task->next;
+    }
+    
+    return shortest_remaining_time_task;
 }
-
-
