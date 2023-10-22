@@ -6,15 +6,12 @@
 // Coloque aqui as suas modificações, p.ex. includes, defines variáveis, 
 // estruturas e funções
 
-#include <time.h>
+#include <signal.h>
+#include <sys/time.h>
 
-unsigned int getSystime () {
-    clock_t clockTicks = clock(); // Obter o número de ciclos de clock decorridos.
-    unsigned int milliseconds = (unsigned int)((clockTicks * 1000) / CLOCKS_PER_SEC);
-
-    return milliseconds;
-}
-
+/**
+*  Task functions
+*/
 void task_set_eet (task_t *task, int et) {
     task_t *task_ptr = task == NULL ? taskExec : task;
 
@@ -35,10 +32,58 @@ int task_get_ret (task_t *task) {
 
 int task_get_et (task_t *task) {
     task_t *task_ptr = task == NULL ? taskExec : task;
-    task_ptr->running_time = task_ptr->last_running_time + (getSystime() - task_ptr->start_time);
+    task_ptr->running_time = task_ptr->last_running_time + (systime() - task_ptr->start_time);
 
     return task_ptr->running_time;
 }
+
+/**
+*  Timer
+*/
+
+// Estrutura que define um tratador de sinal (deve ser global ou static)
+struct sigaction action ;
+
+// Estrutura de inicialização to timer
+struct itimerval timer ;
+
+// Tamanho do quantum em milisegundos
+int quantum_size = 20;
+
+void ticks_handler (int signum) {
+    systemTime += 1;
+    taskExec->ticks_counter -= 1;
+
+    if (taskExec->ticks_counter == 0) {
+        task_yield(); // Preemptar tarefa
+    }
+}
+
+void set_timer () {
+    // Registra a ação para o sinal de timer SIGALRM
+    action.sa_handler = ticks_handler ;
+    sigemptyset (&action.sa_mask) ;
+    action.sa_flags = 0 ;
+
+    if (sigaction (SIGALRM, &action, 0) < 0)
+    {
+        perror ("Erro em sigaction: ") ;
+        exit (1) ;
+    }
+
+    // Ajusta valores do temporizador
+    timer.it_value.tv_usec = 1000;      // primeiro disparo, em micro-segundos
+    timer.it_interval.tv_usec = 1000;   // disparos subsequentes, em micro-segundos
+
+    // arma o temporizador ITIMER_REAL (vide man setitimer)
+    if (setitimer (ITIMER_REAL, &timer, 0) < 0)
+    {
+        perror ("Erro em setitimer: ") ;
+        exit (1) ;
+    }
+}
+
+
 // ****************************************************************************
 
 
@@ -51,7 +96,8 @@ void before_ppos_init () {
 }
 
 void after_ppos_init () {
-    // put your customization here
+    set_timer();
+
 #ifdef DEBUG
     printf("\ninit - AFTER");
 #endif
@@ -86,7 +132,7 @@ void after_task_exit () {
 }
 
 void before_task_switch ( task_t *task ) {
-    task->start_time = getSystime(); // Task que vai receber o processador
+    task->start_time = systime(); // Task que vai receber o processador
     taskExec->last_running_time = task_get_et(NULL);  // Task que vai sair do processador
 #ifdef DEBUG
     printf("\ntask_switch - BEFORE - [%d -> %d]", taskExec->id, task->id);
@@ -94,7 +140,8 @@ void before_task_switch ( task_t *task ) {
 }
 
 void after_task_switch ( task_t *task ) {
-    // put your customization here
+    task->ticks_counter = quantum_size;
+
 #ifdef DEBUG
     printf("\ntask_switch - AFTER - [%d -> %d]", taskExec->id, task->id);
 #endif

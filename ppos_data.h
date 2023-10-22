@@ -29,6 +29,8 @@ typedef struct task_t
    int start_time; // indica em milisegundos quando a tarefa inicou sua execucao em relacao ao tempo global do sistema
    int running_time; // indica o tempo que a tarefa executou ate o momento
    int last_running_time; // indica o tempo que a tarefa executou mas só é atualizado quando a tarefa perde o processador
+
+   int ticks_counter; // contador de ticks da tarefa
    
 } task_t ;
 

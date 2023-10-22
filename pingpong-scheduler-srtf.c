@@ -35,8 +35,8 @@ void Body (void * arg)
   int end_time = one_tick * task_get_eet(NULL);
   int last_printed_line = 0;
 
-  printf ("[%d]\t%s: inicio (tempo de execucao %d)\n", getSystime(), (char *) arg, task_get_eet(NULL)) ;
-  last_printed_line = getSystime();
+  printf ("[%d]\t%s: inicio (tempo de execucao %d)\n", systime(), (char *) arg, task_get_eet(NULL)) ;
+  last_printed_line = systime();
 
   // o campo taskExec->running_time indica o tempo que a tarefa executou ate o momento
   // se for o caso, esse campo pode ser trocado conforme a implementacao de cada equipe
@@ -44,13 +44,13 @@ void Body (void * arg)
   // foi indicado como seu tempo de execucao
   while (task_get_et(NULL) < task_get_eet(NULL)) {
     end_time--;
-    if ((last_printed_line+5) <= getSystime()) {
-      printf ("[%d]\t%s: interacao %d\t\t%d\t%d\n", getSystime(), (char *) arg, end_time, task_get_et(taskExec)) ;
-      last_printed_line = getSystime();
+    if ((last_printed_line+5) <= systime()) {
+      printf ("[%d]\t%s: interacao %d\t\t%d\n", systime(), (char *) arg, end_time, task_get_et(taskExec)) ;
+      last_printed_line = systime();
     }
 
-    if ((last_created_task != getSystime()) && (getSystime()%100) == 0) {
-      last_created_task = getSystime();
+    if ((last_created_task != systime()) && (systime()%100) == 0) {
+      last_created_task = systime();
       // cria uma tarefa com prioridade mais alta
       sprintf(new_task_name, "NEWTask[%2d]", new_tasks_count);
       printf("Criando NOVA tarefa: %s\n", new_task_name);
@@ -60,7 +60,7 @@ void Body (void * arg)
       task_yield();
     }
   }
-  printf ("[%d]\t%s: fim\n", getSystime(), (char *) arg) ;
+  printf ("[%d]\t%s: fim\n", systime(), (char *) arg) ;
   task_exit (0) ;
 }
 
@@ -73,10 +73,10 @@ int main (int argc, char *argv[])
   ppos_init () ;
 
   // waiting for the first microsecond
-  while (getSystime() <= 0) ;
+  while (systime() <= 0) ;
   // estimate how many iterations is a microsecond
-  aux_time = getSystime() + 1;
-  while (getSystime() < aux_time)
+  aux_time = systime() + 1;
+  while (systime() < aux_time)
     one_tick++;
   // adjusting value
   //one_tick = (one_tick*90)/100;
