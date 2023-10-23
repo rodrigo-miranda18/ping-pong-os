@@ -26,9 +26,15 @@ typedef struct task_t
 
    // ... (outros campos deve ser adicionados APOS esse comentario)
    int estimated_execution_time; // indica o tempo estimado para a execucao da tarefa
-   int start_time; // indica em milisegundos quando a tarefa inicou sua execucao em relacao ao tempo global do sistema
-   int running_time; // indica o tempo que a tarefa executou ate o momento
-   int last_running_time; // indica o tempo que a tarefa executou mas só é atualizado quando a tarefa perde o processador
+
+   int execution_time; // indica o tempo total de vida de uma tarefa (desde a sua criação até o seu término)
+   int start_execution_time; // indica o tempo do sistema em milisegundos que a tarefa começou sua execução
+
+   int running_time; // indica o tempo de processamento da tarefa
+   int start_running_time; // indica o tempo do sistema em milisegundos que a tarefa recebeu o processador
+   int last_running_time; // indica o tempo de processamento da tarefa de quando ela perdeu o processador
+
+   int activations; // indica o número de vezes que a tarefa ganhou o processador
 
    int ticks_counter; // contador de ticks da tarefa
    

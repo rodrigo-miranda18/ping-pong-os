@@ -60,7 +60,7 @@ void Body (void * arg)
       task_yield();
     }
   }
-  printf ("[%d]\t%s: fim\n", systime(), (char *) arg) ;
+  printf ("[%d]\t%s: fim\n\n", systime(), (char *) arg) ;
   task_exit (0) ;
 }
 

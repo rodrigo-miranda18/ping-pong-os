@@ -32,7 +32,7 @@ int task_get_ret (task_t *task) {
 
 int task_get_et (task_t *task) {
     task_t *task_ptr = task == NULL ? taskExec : task;
-    task_ptr->running_time = task_ptr->last_running_time + (systime() - task_ptr->start_time);
+    task_ptr->running_time = task_ptr->last_running_time + (systime() - task_ptr->start_running_time);
 
     return task_ptr->running_time;
 }
@@ -111,35 +111,39 @@ void before_task_create (task_t *task ) {
 }
 
 void after_task_create (task_t *task ) {
-    // put your customization here
+    task->start_execution_time = systime();
+
 #ifdef DEBUG
     printf("\ntask_create - AFTER - [%d]", task->id);
 #endif
 }
 
 void before_task_exit () {
-    // put your customization here
+    taskExec->execution_time = systime() - taskExec->start_execution_time;
+
 #ifdef DEBUG
     printf("\ntask_exit - BEFORE - [%d]", taskExec->id);
 #endif
 }
 
 void after_task_exit () {
-    // put your customization here
+    printf ("Task [%d] exit: execution time %d ms, processor time %d ms, %d activations\n", taskExec->id, taskExec->execution_time, taskExec->running_time, taskExec->activations) ;
+
 #ifdef DEBUG
     printf("\ntask_exit - AFTER- [%d]", taskExec->id);
 #endif
 }
 
 void before_task_switch ( task_t *task ) {
-    task->start_time = systime(); // Task que vai receber o processador
-    taskExec->last_running_time = task_get_et(NULL);  // Task que vai sair do processador
+    task->start_running_time = systime(); // Task que vai receber o processado
+    taskExec->last_running_time = task_get_et(NULL); // Task que vai sair do processador
 #ifdef DEBUG
     printf("\ntask_switch - BEFORE - [%d -> %d]", taskExec->id, task->id);
 #endif
 }
 
 void after_task_switch ( task_t *task ) {
+    task->activations += 1;
     task->ticks_counter = quantum_size;
 
 #ifdef DEBUG
