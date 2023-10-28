@@ -31,8 +31,6 @@ typedef struct task_t
    int start_execution_time; // indica o tempo do sistema em milisegundos que a tarefa começou sua execução
 
    int running_time; // indica o tempo de processamento da tarefa
-   int start_running_time; // indica o tempo do sistema em milisegundos que a tarefa recebeu o processador
-   int last_running_time; // indica o tempo de processamento da tarefa de quando ela perdeu o processador
 
    int activations; // indica o número de vezes que a tarefa ganhou o processador
 
