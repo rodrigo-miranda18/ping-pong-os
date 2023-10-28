@@ -485,8 +485,8 @@ task_t * scheduler() {
         return NULL;
     }
 
-    task_t *current_task = readyQueue;
-    task_t *shortest_remaining_time_task = readyQueue;
+    task_t *current_task = task_get_ret(readyQueue) > 0 ? readyQueue : readyQueue->next;
+    task_t *shortest_remaining_time_task = current_task;
 
     while (current_task->next != readyQueue) {
         if (task_get_ret(current_task->next) < task_get_ret(shortest_remaining_time_task) && task_get_ret(current_task->next) > 0) {
@@ -495,6 +495,6 @@ task_t * scheduler() {
 
         current_task = current_task->next;
     }
-    
+
     return shortest_remaining_time_task;
 }
