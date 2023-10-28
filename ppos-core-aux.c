@@ -30,13 +30,6 @@ int task_get_ret (task_t *task) {
     return (task->estimated_execution_time - task->running_time);
 }
 
-int task_get_et (task_t *task) {
-    task_t *task_ptr = task == NULL ? taskExec : task;
-    task_ptr->running_time = task_ptr->last_running_time + (systime() - task_ptr->start_running_time);
-
-    return task_ptr->running_time;
-}
-
 /**
 *  Timer
 */
@@ -52,6 +45,7 @@ int quantum_size = 20;
 
 void ticks_handler (int signum) {
     systemTime += 1;
+    taskExec->running_time += 1;
     taskExec->ticks_counter -= 1;
 
     if (taskExec->ticks_counter == 0) {
@@ -135,8 +129,7 @@ void after_task_exit () {
 }
 
 void before_task_switch ( task_t *task ) {
-    task->start_running_time = systime(); // Task que vai receber o processado
-    taskExec->last_running_time = task_get_et(NULL); // Task que vai sair do processador
+    // put your customization here
 #ifdef DEBUG
     printf("\ntask_switch - BEFORE - [%d -> %d]", taskExec->id, task->id);
 #endif
